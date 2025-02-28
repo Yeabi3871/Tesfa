@@ -1,0 +1,185 @@
+document.addEventListener('DOMContentLoaded', function() {
+    // Navigation active state
+    const navLinks = document.querySelectorAll('nav a');
+    const sections = document.querySelectorAll('.section');
+    
+    window.addEventListener('scroll', () => {
+        let current = '';
+        
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop - 100;
+            const sectionHeight = section.clientHeight;
+            if (pageYOffset >= sectionTop && pageYOffset < sectionTop + sectionHeight) {
+                current = section.getAttribute('id');
+            }
+        });
+        
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${current}`) {
+                link.classList.add('active');
+            }
+        });
+    });
+    
+    // Book data
+    const books = [
+        {
+            title: "The Quiet Mind",
+            author: "Jane Stevens",
+            cover: createBookCover("#9C83E3", "#EFE8FF"),
+            description: "A journey into mindfulness and inner peace through daily practices.",
+            tags: ["nonfiction", "mindfulness"]
+        },
+        {
+            title: "Echoes in Silence",
+            author: "Robert Chen",
+            cover: createBookCover("#6B4ED8", "#F5F5FF"),
+            description: "An epic tale of self-discovery in the Himalayan mountains.",
+            tags: ["fiction", "adventure"]
+        },
+        {
+            title: "Whispers of the Soul",
+            author: "Emma Clarke",
+            cover: createBookCover("#8A6BDE", "#EFE8FF"),
+            description: "A collection of poems exploring the depths of human emotion.",
+            tags: ["poetry", "emotions"]
+        },
+        {
+            title: "The Art of Stillness",
+            author: "Michael Torres",
+            cover: createBookCover("#9C83E3", "#F5F5FF"),
+            description: "Finding peace in a chaotic world through simple techniques.",
+            tags: ["nonfiction", "self-help"]
+        },
+        {
+            title: "Beyond the Horizon",
+            author: "Sarah Johnson",
+            cover: createBookCover("#6B4ED8", "#EFE8FF"),
+            description: "A captivating story of courage and hope set in a dystopian future.",
+            tags: ["fiction", "dystopian"]
+        },
+        {
+            title: "The Silent Lake",
+            author: "David Williams",
+            cover: createBookCover("#8A6BDE", "#F5F5FF"),
+            description: "A mystery novel set in a tranquil town with dark secrets.",
+            tags: ["fiction", "mystery"]
+        },
+        {
+            title: "Petals of Thought",
+            author: "Aisha Patel",
+            cover: createBookCover("#9C83E3", "#EFE8FF"),
+            description: "Delicate poems that explore nature and human connection.",
+            tags: ["poetry", "nature"]
+        },
+        {
+            title: "Mindful Living",
+            author: "Thomas Lee",
+            cover: createBookCover("#6B4ED8", "#F5F5FF"),
+            description: "Practical guide to incorporating mindfulness into daily routines.",
+            tags: ["nonfiction", "mindfulness"]
+        }
+    ];
+    
+    // Create book cover SVG
+    function createBookCover(color, bgColor) {
+        return `
+            <svg width="200" height="280" viewBox="0 0 200 280">
+                <rect width="200" height="280" rx="10" fill="${color}" />
+                <rect x="15" y="15" width="170" height="250" rx="6" fill="${bgColor}" />
+                <path d="M40 60L160 60M40 100L160 100M40 140L160 140M40 180L120 180" stroke="${color}" stroke-width="5" stroke-linecap="round" />
+                <circle cx="100" cy="230" r="20" fill="${color}" opacity="0.6" />
+            </svg>
+        `;
+    }
+    
+    // Display books
+    function displayBooks(filter = 'all') {
+        const booksContainer = document.querySelector('.books-container');
+        booksContainer.innerHTML = '';
+        
+        const filteredBooks = filter === 'all' 
+            ? books 
+            : books.filter(book => book.tags.includes(filter));
+        
+        filteredBooks.forEach(book => {
+            const bookCard = document.createElement('div');
+            bookCard.className = 'book-card';
+            
+            bookCard.innerHTML = `
+                <div class="book-cover">${book.cover}</div>
+                <div class="book-info">
+                    <h3>${book.title}</h3>
+                    <p>by ${book.author}</p>
+                    <p>${book.description}</p>
+                    <div class="book-tags">
+                        ${book.tags.map(tag => `<span class="book-tag">${tag}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+            
+            booksContainer.appendChild(bookCard);
+        });
+    }
+    
+    // Initialize books display
+    displayBooks();
+    
+    // Book filter functionality
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove active class from all buttons
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            button.classList.add('active');
+            
+            // Filter books
+            const filter = button.getAttribute('data-filter');
+            displayBooks(filter);
+        });
+    });
+    
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+    
+    // Browse Collection button scrolls to books section
+    document.querySelector('.cta-button').addEventListener('click', () => {
+        document.querySelector('#books').scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+    
+    // Add subtle animation to sections when they come into view
+    const observerOptions = {
+        threshold: 0.1
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    sections.forEach(section => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        section.style.transition = 'all 0.8s ease-out';
+        observer.observe(section);
+    });
+});
+
